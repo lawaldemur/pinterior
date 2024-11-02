@@ -1,5 +1,8 @@
 import os
+import base64
 import requests
+from openai import OpenAI
+from pydantic import BaseModel
 from dotenv import load_dotenv
 
 os.makedirs("images", exist_ok=True)
@@ -7,6 +10,14 @@ os.makedirs("rendered", exist_ok=True)
 
 load_dotenv()
 STABILITY_KEY = os.getenv("STABILITY_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+client = OpenAI()
+
+class ObjectEditing(BaseModel):
+    search_object: str
+    edit_prompt: str
+
 
 def send_generation_request(
     host,
@@ -83,3 +94,47 @@ def request_image_edit(image_path, edit_prompt, search_object):
     print(f"Saved image {edited}")
 
     return edited
+
+
+def encode_image(image_path):
+  with open(image_path, "rb") as image_file:
+    return base64.b64encode(image_file.read()).decode('utf-8')
+
+def get_difference_between_images(image1, image2):
+    base64_image1 = encode_image(image1)
+    base64_image2 = encode_image(image2)
+
+    messages = [
+        {
+        "role": "user",
+        "content": [
+            {
+                "type": "text",
+                "text": "What is the most noticeable object to update asthetics of the first image to look more like the second image? We'll edit the design of specified search object in the image according to the suggested style of the second image. Please provide a prompt to generate an edited version of the object in the image according to the style difference",
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{base64_image1}",
+                },
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{base64_image2}",
+                },
+            },
+        ],
+        }
+    ]
+
+    print("difference processing")
+    response = client.beta.chat.completions.parse(
+        model="gpt-4o",
+        messages=messages,
+        response_format=ObjectEditing,
+    )
+    edit_object = response.choices[0].message.parsed
+
+    print(f"{edit_object.search_object}: {edit_object.edit_prompt}")
+    return edit_object

@@ -2,11 +2,18 @@ from flask import Flask, request, jsonify
 import os
 from werkzeug.utils import secure_filename
 
+from ai import request_image_edit, get_difference_between_images
+
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "./images"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Create the folder if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+global_data = {
+    "room_image_path": None,
+    "reference_image_path": None
+}
 
 @app.route('/')
 def hello_world():
@@ -26,7 +33,8 @@ def room_upload():
     file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     file.save(file_path)
 
-    print(f"Image uploaded to {file_path}")
+    global_data["room_image_path"] = file_path
+    print(f"Room image uploaded to {file_path}")
     return jsonify({"message": "Image uploaded successfully", "file_path": file_path}), 200
 
 
@@ -44,8 +52,14 @@ def reference_upload():
     reference_path = os.path.join(app.config["UPLOAD_FOLDER"], reference_filename)
     reference.save(reference_path)
 
+    global_data["reference_image_path"] = reference_path
     print(f"Reference uploaded to {reference_path}")
-    return jsonify({"message": "Reference uploaded successfully", "file_path": reference_path}), 200
+
+    object_edit = get_difference_between_images(global_data["room_image_path"], global_data["reference_image_path"])
+    edited_image_path = request_image_edit(global_data["room_image_path"], object_edit.edit_prompt, object_edit.search_object)
+
+    print(edited_image_path)
+    return jsonify({"message": "Image edit successfully applied", "file_path": edited_image_path}), 200
 
 
 if __name__ == '__main__':
