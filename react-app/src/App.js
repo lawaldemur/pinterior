@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import Process from "./components/Process";
 import Upload from "./components/Upload";
+import Results from "./components/Results";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Upload />} />
         <Route path="/process" element={<Process />} />
+        <Route path="/results" element={<Results />} />
       </Routes>
     </Router>
   );
