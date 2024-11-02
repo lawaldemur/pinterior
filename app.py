@@ -5,7 +5,7 @@ from werkzeug.utils import secure_filename
 
 from ai import request_image_edit, get_difference_between_images
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='images')
 CORS(app, origins=["http://localhost:3000"])
 
 UPLOAD_FOLDER = "./images"
@@ -14,6 +14,7 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 global_data = {
     "room_image_path": None,
+    "room_image_file": None,
     "reference_image_path": None
 }
 
@@ -36,6 +37,7 @@ def room_upload():
     file.save(file_path)
 
     global_data["room_image_path"] = file_path
+    global_data["room_image_file"] = filename
     print(f"Room image uploaded to {file_path}")
     return jsonify({"message": "Image uploaded successfully", "file_path": file_path}), 200
 
@@ -82,6 +84,10 @@ def get_folder_structure(root_dir):
             current['files'] = [os.path.abspath(os.path.join(root, file)) for file in files]
 
     return folder_structure
+
+@app.route("/get_room_image", methods=["GET"])
+def get_room_image():
+    return jsonify({ "filename": "http://localhost:5005/images/" + global_data["room_image_file"]  })
 
 @app.route('/board_images', methods=['GET'])
 def folder_structure():

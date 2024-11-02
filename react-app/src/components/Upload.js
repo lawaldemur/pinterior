@@ -41,24 +41,6 @@ function Upload() {
     }
   };
 
-  // const formData = new FormData();
-  // formData.append("reference", reference);
-
-  // try {
-  //   const response = await axios.post(
-  //     "http://localhost:5005/referenceUpload",
-  //     formData,
-  //     {
-  //       headers: {
-  //         "Content-Type": "multipart/form-data",
-  //       },
-  //     }
-  //   );
-  //   console.log("Reference uploaded successfully");
-  // } catch (error) {
-  //   console.log("Error uploading reference:", error);
-  // }
-
   return (
     <div>
       <form onSubmit={handleImageUpload}>
