@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import os
 from werkzeug.utils import secure_filename
 
 from ai import request_image_edit, get_difference_between_images
 
 app = Flask(__name__)
+CORS(app, origins=["http://localhost:3000"])
 
 UPLOAD_FOLDER = "./images"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)

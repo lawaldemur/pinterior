@@ -7,18 +7,18 @@ function Upload() {
   const [preview, setPreview] = useState();
   const navigate = useNavigate();
 
+  // Triggered when a file is chosen
   function handleImageChange(e) {
-    setFile(e.target.files[0]);
-    setPreview(URL.createObjectURL(e.target.files[0]));
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+    setPreview(URL.createObjectURL(selectedFile));
+
+    // Automatically upload after setting the file
+    handleImageUpload(selectedFile);
   }
 
-  function handleSubmitLink(e) {
-    e.preventDefault();
-    navigate("/process");
-  }
-
-  const handleImageUpload = async (event) => {
-    event.preventDefault();
+  // Handles the image upload
+  const handleImageUpload = async (file) => {
     const formData = new FormData();
     formData.append("image", file);
 
@@ -32,7 +32,10 @@ function Upload() {
           },
         }
       );
-      console.log("Image uploaded successfully");
+      console.log("Image uploaded successfully:", response);
+
+      // Navigate to /process after successful upload
+      navigate("/process");
     } catch (error) {
       console.log("Error uploading image:", error);
     }
@@ -58,16 +61,9 @@ function Upload() {
 
   return (
     <div>
-      class
       <form onSubmit={handleImageUpload}>
         <section className="previewSection">
-          <div className="previewBlock">
-            <img src={preview} alt="Preview" />
-          </div>
           <input type="file" onChange={handleImageChange} />
-          <button type="submit" onClick={handleSubmitLink}>
-            submit and link to Pinterest
-          </button>
         </section>
       </form>
     </div>

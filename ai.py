@@ -19,6 +19,17 @@ class ObjectEditing(BaseModel):
     edit_prompt: str
 
 
+PROMPT = """
+Reference Image (the first image): This is the current room that I want to enhance. Keep the structure of this room unchanged, using it as a starting point.
+
+Inspiration Image (the second image): This could be any space or item that conveys a style, mood, or aesthetic quality. This image is not necessarily from the same type of room as the reference image but should serve as a creative influence or thematic guide.
+
+Task: Using the inspiration image to inform your decision, make a single change to the reference image that best elevates or enhances its aesthetic. This change can be a color adjustment, a furniture upgrade, a lighting choice, or any other design element.
+
+Please provide an object to search for and a what do you want to see instead of this according to the style difference, showcasing the chosen single change that best improves the room’s overall aesthetic while preserving its original structure. I'll edit design of the chosen search object in the first reference image according to the suggested prompt based on the second inspiration image.
+"""
+#  You don’t need to replicate an item from the inspiration image directly; instead, focus on capturing the essence or vibe and apply it in a subtle, high-level manner.
+
 def send_generation_request(
     host,
     params,
@@ -110,7 +121,7 @@ def get_difference_between_images(image1, image2):
         "content": [
             {
                 "type": "text",
-                "text": "What is the most noticeable object to update asthetics of the first image to look more like the second image? We'll edit the design of specified search object in the image according to the suggested style of the second image. Please provide a prompt to generate an edited version of the object in the image according to the style difference",
+                "text": PROMPT,
             },
             {
                 "type": "image_url",
