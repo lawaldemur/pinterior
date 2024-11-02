@@ -1,33 +1,86 @@
 import "./App.css";
+import { useState } from "react";
+import axios from "axios";
 
 function App() {
+  const [file, setFile] = useState();
+  const [preview, setPreview] = useState();
+  const [reference, setReference] = useState(null);
+
+  function handleImageChange(e) {
+    setFile(e.target.files[0]);
+    setPreview(URL.createObjectURL(e.target.files[0]));
+  }
+
+  function handleReferenceChange(e) {
+    setReference(e.target.files[0]);
+  }
+
+  const handleImageUpload = async (event) => {
+    event.preventDefault();
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5005/roomUpload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("Image uploaded successfully");
+    } catch (error) {
+      console.log("Error uploading image:", error);
+    }
+  };
+
+  const handleReferenceUpload = async (event) => {
+    event.preventDefault();
+    if (!reference) {
+      alert("Please select a reference file to upload");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("reference", reference);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5005/referenceUpload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("Reference uploaded successfully");
+    } catch (error) {
+      console.log("Error uploading reference:", error);
+    }
+  };
+
   return (
     <div>
-      <section className="hidden sm:block">
-        <div>Please access it on your phone!</div>
-      </section>
-      <section className="block sm:hidden">
-        <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
-          <div className="md:flex">
-            <div className="md:shrink-0"></div>
-            <div className="p-8">
-              <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold">
-                Company retreats
-              </div>
-              <a
-                href="#"
-                className="block mt-1 text-lg leading-tight font-medium text-black hover:underline"
-              >
-                Incredible accommodation for your team
-              </a>
-              <p className="mt-2 text-slate-500">
-                Looking to take your team away on a retreat to enjoy awesome
-                food and take in some sunshine? We have a list of places to do
-                just that.
-              </p>
-            </div>
+      <form onSubmit={handleImageUpload}>
+        <section className="previewSection">
+          <div className="previewBlock">
+            <img src={preview} alt="Preview" />
           </div>
-        </div>
+          <input type="file" onChange={handleImageChange} />
+          <button type="submit">Upload Image</button>
+        </section>
+      </form>
+      
+      <section className="references">
+        <p>Upload references one by one:</p>
+        <form onSubmit={handleReferenceUpload}>
+          <input type="file" onChange={handleReferenceChange} />
+          <button type="submit">Upload Reference</button>
+        </form>
       </section>
     </div>
   );
