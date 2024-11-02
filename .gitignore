@@ -12,3 +12,5 @@ ENV_DIR/
 
 rendered/
 images/
+
+node_modules/
