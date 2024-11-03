@@ -22,7 +22,6 @@ function Upload() {
     // padding: 4em;
     background: ${Colors.neutral50};
   `;
-
   // Triggered when a file is chosen
   function handleImageChange(e) {
     const selectedFile = e.target.files[0];
