@@ -16,7 +16,9 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 global_data = {
     "room_image_path": None,
     "room_image_file": None,
-    "reference_image_path": None
+    "reference_image_path": None,
+    "reference_image_file": None,
+    "edited_image": [],
 }
 
 @app.route('/')
@@ -53,8 +55,11 @@ def apply_pinterest_image():
     image_url = unquote(data["url"]).replace("http://localhost:5005/", "./")
 
     object_edit = get_difference_between_images(global_data["room_image_path"], image_url)
+    global_data["edited_image"].append(object_edit.search_object)
+
     edited_image_path = request_image_edit(global_data["room_image_path"], object_edit.edit_prompt, object_edit.search_object)
     edited_image_file = os.path.basename(edited_image_path)
+    global_data["reference_image_file"] = edited_image_file
 
     # TODO
     global_data["room_image_path"] = edited_image_path
@@ -78,6 +83,7 @@ def reference_upload():
     reference_path = os.path.join(app.config["UPLOAD_FOLDER"], reference_filename)
     reference.save(reference_path)
 
+    global_data["reference_image_path"] = reference_path
     global_data["reference_image_path"] = reference_path
     print(f"Reference uploaded to {reference_path}")
 

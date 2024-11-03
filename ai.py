@@ -109,6 +109,9 @@ def get_difference_between_images(image1, image2, ignore=[]):
 
     Please provide an object to search for and a what do you want to see instead of this according to the style difference, showcasing the chosen single change that best improves the room’s overall aesthetic while preserving its original structure. I'll edit design of the chosen search object in the first reference image according to the suggested prompt based on the second inspiration image.
     """
+    if ignore:
+        PROMPT += f"\nDon't suggested to edit the following items: {', '.join(ignore)}."
+
     #  You don’t need to replicate an item from the inspiration image directly; instead, focus on capturing the essence or vibe and apply it in a subtle, high-level manner.
 
     base64_image1 = encode_image(image1)
