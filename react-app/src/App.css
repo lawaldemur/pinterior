@@ -208,16 +208,19 @@
   max-height: 80%;
   background-color: #fff;
   padding-bottom: 40px;
-  transform: translateY(100%); /* Start off-screen */
-  transition: transform 0.3s ease-in-out;
+
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  border-top: 1px solid #ccc;
+
+  transform: translateY(100%);
+  transition: transform 0.1s ease-in-out;
+
+  overflow-y: auto;
 }
 
 .imageGridSection.visible {
-  transform: translateY(0); /* Slide into view */
-}
-
-.imageGridSection.hidden {
-  transform: translateY(100%); /* Slide out of view */
+  transform: translateY(0);
 }
 
 .imageGridSection-toggle {
@@ -226,6 +229,10 @@
   cursor: pointer;
 }
 
+.changesExplanation {
+  font-size: 0.9rem;
+  color: #686D76;
+}
 
 
 
@@ -346,3 +353,6 @@
   height: 100%;
 }
 
+.imageGridSection-toggle {
+  font-weight: bold;
+}

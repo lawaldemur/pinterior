@@ -10,6 +10,8 @@ function Process() {
   const [boardImages, setBoardImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState(false);
+  const [explanation, setExplanation] = useState("");
+  const [isImageGridVisible, setIsImageGridVisible] = useState(false);
 
   useEffect(() => {
     axios
@@ -34,23 +36,36 @@ function Process() {
 
   const handleBoardClick = (boardName) => {
     setBoardImages(boardsData[boardName].files);
+    setIsImageGridVisible(true);
   };
 
   const handleToggleImageGridClick = () => {
     setBoardImages([]);
+    setIsImageGridVisible(false);
   }
 
   const applyBoardImage = (imageUrl) => {
+    setExplanation("");
+    setIsImageGridVisible(false);
+
     setLoading(true);
     axios
       .post("http://localhost:5005/applyPinterestImage", { url: imageUrl, mode: (mode ? "super" : "standard") })
       .then((response) => {
         setImagePath(response.data.file_path)
         setLoading(false);
+        updateExplanation();
       })
       .catch((error) => console.error("Error sending image URL:", error));
 
     handleToggleImageGridClick();
+  };
+
+  const updateExplanation = () => {
+    axios
+      .get("http://localhost:5005/explainChanges")
+      .then((response) => setExplanation(response.data.explanation))
+      .catch((error) => console.error("Error fetching explanation:", error));
   };
 
   const handleToggle = () => {
@@ -98,6 +113,7 @@ function Process() {
         ) : (
           <p>Loading image...</p>
         )}
+        <p className="changesExplanation">{ explanation }</p>
       </div>
       <div className="section">
         <h3 className="subtitle">Your Pinterest Boards</h3>
@@ -129,8 +145,8 @@ function Process() {
         </div>
       )}
 
-      {boardImages.length > 0 && (
-      <div className="{`imageGridSection ${(boardImages.length > 0) ? 'visible' : 'hidden'}`}">
+    {(
+      <div className={`imageGridSection ${isImageGridVisible ? 'visible' : ''}`}>
         <div className="imageGridSection-toggle" onClick={handleToggleImageGridClick}>
           ______
         </div>

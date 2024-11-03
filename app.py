@@ -91,8 +91,9 @@ def apply_pinterest_image():
 
 @app.route("/explainChanges", methods=["GET"])
 def explain_changes():
+    print(global_data["room_image_path"], global_data["initial_room_image_path"])
     object_edit = get_changes_explanation(global_data["room_image_path"], global_data["initial_room_image_path"])
-    return jsonify(object_edit), 200
+    return jsonify({"explanation": object_edit }), 200
 
 
 @app.route("/regenerateImage", methods=["POST"])
