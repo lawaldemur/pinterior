@@ -95,22 +95,71 @@ def request_image_edit(image_path, edit_prompt, search_object):
     return edited
 
 
+def request_structure_edit(image_path, edit_prompt):
+    image = image_path
+    prompt = edit_prompt #@param {type:"string"}
+    negative_prompt = "" #@param {type:"string"}
+    control_strength = 0.8  #@param {type:"slider", min:0, max:1, step:0.05}
+    seed = 0 #@param {type:"integer"}
+    output_format = "jpeg" #@param ["webp", "jpeg", "png"]
+
+    host = f"https://api.stability.ai/v2beta/stable-image/control/structure"
+
+    params = {
+        "control_strength" : control_strength,
+        "image" : image,
+        "seed" : seed,
+        "output_format": output_format,
+        "prompt" : prompt,
+        "negative_prompt" : negative_prompt,
+    }
+
+    response = send_generation_request(
+        host,
+        params
+    )
+
+    # Decode response
+    output_image = response.content
+    finish_reason = response.headers.get("finish-reason")
+    seed = response.headers.get("seed")
+
+    # Check for NSFW classification
+    if finish_reason == 'CONTENT_FILTERED':
+        raise Warning("Generation failed NSFW classifier")
+
+     # Save and display result
+    filename, _ = os.path.splitext(os.path.basename(image))
+    edited = f"./images/r_edited_{filename}_{seed}.{output_format}"
+    with open(edited, "wb") as f:
+        f.write(response.content)  # Use response.content to get the image bytes
+    print(f"Saved image {edited}")
+
+    return edited
+
+
 def encode_image(image_path):
   with open(image_path, "rb") as image_file:
     return base64.b64encode(image_file.read()).decode('utf-8')
 
-def get_difference_between_images(image1, image2, ignore=[]):
+
+def get_difference_between_images(image1, image2, ignore=[], object_edit=True):
     PROMPT = """
     Reference Image (the first image): This is the current room that I want to enhance. Keep the structure of this room unchanged, using it as a starting point.
 
     Inspiration Image (the second image): This could be any space or item that conveys a style, mood, or aesthetic quality. This image is not necessarily from the same type of room as the reference image but should serve as a creative influence or thematic guide.
 
-    Task: Using the inspiration image to inform your decision, make a single change to the reference image that best elevates or enhances its aesthetic. This change can be a color adjustment, a furniture upgrade, a lighting choice, or any other design element.
+    Task: Using the inspiration image to inform your decision, make a single change to the reference image that best elevates or enhances its aesthetic. This change can be a color adjustment, a furniture upgrade, a lighting choice, or any other design element."""
 
-    Please provide an object to search for and a what do you want to see instead of this according to the style difference, showcasing the chosen single change that best improves the room’s overall aesthetic while preserving its original structure. I'll edit design of the chosen search object in the first reference image according to the suggested prompt based on the second inspiration image.
-    """
+    if object_edit:
+        PROMPT += """
+Please provide an object to search for and a what do you want to see instead of this according to the style difference, showcasing the chosen single change that best improves the room’s overall aesthetic while preserving its original structure. I'll edit design of the chosen search object in the first reference image according to the suggested prompt based on the second inspiration image."""
+    else:
+        PROMPT += """Provide new design style for the room based on the inspiration image which will be applied to the reference image. Be as short as one sentence."""
+
     if ignore:
-        PROMPT += f"\nDon't suggested to edit the following items: {', '.join(ignore)}."
+        PROMPT += f"\nDon't suggested to edit the following or similar items: {', '.join(ignore)}."
+        print(f"Ignoring: {', '.join(ignore)}")
 
     #  You don’t need to replicate an item from the inspiration image directly; instead, focus on capturing the essence or vibe and apply it in a subtle, high-level manner.
 
@@ -142,12 +191,66 @@ def get_difference_between_images(image1, image2, ignore=[]):
     ]
 
     print("difference processing")
+
+    if object_edit:
+        response = client.beta.chat.completions.parse(
+            model="gpt-4o",
+            messages=messages,
+            response_format=ObjectEditing if object_edit else None,
+        )
+        edit_object = response.choices[0].message.parsed
+
+        print(f"{edit_object.search_object}: {edit_object.edit_prompt}")
+        return edit_object
+    else:
+        response = client.beta.chat.completions.parse(
+            model="gpt-4o",
+            messages=messages,
+        )
+        edit_object = response.choices[0].message.content
+
+        print(f"{edit_object}")
+        return edit_object
+    
+
+
+def get_changes_explanation(image1, image2):
+    PROMPT = """Provide a brief explanation of the changes made to the second image based on the inital base image. Explain how the changes enhance the aesthetic of the room and how to achieve them."""
+    
+    base64_image1 = encode_image(image1)
+    base64_image2 = encode_image(image2)
+
+    messages = [
+        {
+        "role": "user",
+        "content": [
+            {
+                "type": "text",
+                "text": PROMPT,
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{base64_image1}",
+                },
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{base64_image2}",
+                },
+            },
+        ],
+        }
+    ]
+
+    print("difference tips processing")
+
     response = client.beta.chat.completions.parse(
         model="gpt-4o",
         messages=messages,
-        response_format=ObjectEditing,
     )
-    edit_object = response.choices[0].message.parsed
+    result = response.choices[0].message.content
 
-    print(f"{edit_object.search_object}: {edit_object.edit_prompt}")
-    return edit_object
+    print(f"{result}")
+    return result
