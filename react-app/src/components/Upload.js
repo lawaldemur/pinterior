@@ -1,12 +1,27 @@
 import { useState } from "react";
+import styled from "styled-components";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import addSVG from "../assets/add.svg";
+import Formats from "../formats";
+import Colors from "../color";
+import Fonts from "../fonts";
 
 function Upload() {
   const [file, setFile] = useState();
   const [preview, setPreview] = useState();
   const navigate = useNavigate();
 
+  const Wrapper = styled.section`
+    width: 300px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 30px;
+    // padding: 4em;
+    background: ${Colors.neutral50};
+  `;
   // Triggered when a file is chosen
   function handleImageChange(e) {
     const selectedFile = e.target.files[0];
