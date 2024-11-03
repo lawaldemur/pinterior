@@ -215,10 +215,10 @@ Please provide an object to search for and a what do you want to see instead of 
 
 
 def get_changes_explanation(image1, image2):
-    PROMPT = """Provide a brief explanation of the changes made to the second image based on the inital base image. Explain how the changes enhance the aesthetic of the room and how to achieve them."""
+    PROMPT = """Please provide a guide what furniture elements should be changed in the first image to make it look like the second image. Be as short as one sentence and sound as a human interior design expert."""
     
-    base64_image1 = encode_image(image1)
-    base64_image2 = encode_image(image2)
+    base64_image1 = encode_image(image2)
+    base64_image2 = encode_image(image1)
 
     messages = [
         {

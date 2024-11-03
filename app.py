@@ -16,6 +16,8 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 global_data = {
     "initial_room_image_path": None,
     "initial_room_image_file": None,
+    "previous_room_image_path": None,
+    "previous_room_image_file": None,
     "room_image_path": None,
     "room_image_file": None,
     "reference_image_path": None,
@@ -70,9 +72,12 @@ def apply_pinterest_image():
         edited_image_path = request_structure_edit(global_data["room_image_path"], object_edit)
 
     edited_image_file = os.path.basename(edited_image_path)
-    global_data["reference_image_file"] = edited_image_file
+    global_data["reference_image_file"] = image_url
 
     # TODO
+    global_data["previous_room_image_path"] = global_data["room_image_path"]
+    global_data["previous_room_image_file"] = global_data["room_image_file"]
+
     global_data["room_image_path"] = edited_image_path
     global_data["room_image_file"] = edited_image_file
     if not global_data["room_image_file"].startswith("r_"):
@@ -86,8 +91,45 @@ def apply_pinterest_image():
 
 @app.route("/explainChanges", methods=["GET"])
 def explain_changes():
+    print(global_data["room_image_path"], global_data["initial_room_image_path"])
     object_edit = get_changes_explanation(global_data["room_image_path"], global_data["initial_room_image_path"])
-    return jsonify(object_edit), 200
+    return jsonify({"explanation": object_edit }), 200
+
+
+@app.route("/regenerateImage", methods=["POST"])
+def regenerate_image():
+    data = request.get_json()
+    mode = data["mode"] if "mode" in data else "standard"
+
+    global_data["room_image_path"] = global_data["previous_room_image_path"]
+    global_data["room_image_file"] = global_data["previous_room_image_file"]
+
+    object_edit = get_difference_between_images(global_data["room_image_path"], global_data["reference_image_file"], global_data["edited_image"], mode == "standard")
+
+    if mode == "standard":
+        # global_data["edited_image"].append(object_edit.search_object)
+        edited_image_path = request_image_edit(global_data["room_image_path"], object_edit.edit_prompt, object_edit.search_object)
+    else:
+        edited_image_path = request_structure_edit(global_data["room_image_path"], object_edit)
+
+    edited_image_file = os.path.basename(edited_image_path)
+    global_data["reference_image_file"] = global_data["reference_image_file"]
+
+    # TODO
+    global_data["previous_room_image_path"] = edited_image_path
+    global_data["previous_room_image_file"] = edited_image_file
+
+    global_data["room_image_path"] = edited_image_path
+    global_data["room_image_file"] = edited_image_file
+    if not global_data["room_image_file"].startswith("r_"):
+        global_data["edited_image"] = []
+        global_data["initial_room_image_path"] = edited_image_path
+        global_data["initial_room_image_file"] = edited_image_file
+
+    print(edited_image_path)
+    return jsonify({"message": "Image edit successfully applied", "file_path": "http://localhost:5005/images/" + edited_image_file }), 200
+
+    
 
 # @app.route("/referenceUpload", methods=["POST"])
 # def reference_upload():

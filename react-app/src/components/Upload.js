@@ -57,28 +57,28 @@ function Upload() {
   };
 
   return (
-    <div>
-      <div className="flex flex-col gap-24 items-center justify-center">
-        <div
-          style={{
-            fontFamily: Fonts.Roboto,
-            fontSize: Formats.displayLG,
-          }}
-        >
-          Welcome to Pinterior
-        </div>
-        <div className="flex flex-col gap-4 items-center">
-          <div style={{ fontFamily: Fonts.New_ronan }}>
-            Upload your room image
+    <div className="upload-container">
+      <h1 className="title">Welcome to<br></br>Pinterior</h1>
+      <p className="subtitle">Upload your room image</p>
+      <form onSubmit={handleImageUpload} className="upload-form">
+        <section className="previewSection">
+          <label>
+          <input
+            type="file"
+            onChange={handleImageChange}
+            className="file-input"
+          />
+          <div className="upload-box">
+            {preview ? (
+              <img src={preview} alt="Preview" className="preview-image" />
+            ) : (
+              <span className="plus-icon">+</span>
+            )}
           </div>
-          <label className="previewSection">
-            <Wrapper>
-              <img src={addSVG} alt="Add Icon" />;
-              <input type="file" hidden onChange={handleImageChange} />
-            </Wrapper>
           </label>
-        </div>
-      </div>
+        </section>
+      </form>
+      <img src="http://localhost:5005/images/logo.png" alt="logo" className="logo-image" />
     </div>
   );
 }
