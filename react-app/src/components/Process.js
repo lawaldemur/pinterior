@@ -107,7 +107,7 @@ function Process() {
       </div>
 
       <div className="section">
-        <h2 className="title">Your Room</h2>
+        <h2 className="process_title">Your Room</h2>
         {imagePath ? (
           <img src={imagePath} alt="Room" className="room-image" />
         ) : (

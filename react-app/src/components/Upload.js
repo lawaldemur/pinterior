@@ -43,7 +43,7 @@ function Upload() {
 
   return (
     <div className="upload-container">
-      <h1 className="title">Welcome to Pinterior</h1>
+      <h1 className="title">Welcome to<br></br>Pinterior</h1>
       <p className="subtitle">Upload your room image</p>
       <form onSubmit={handleImageUpload} className="upload-form">
         <section className="previewSection">
@@ -63,6 +63,7 @@ function Upload() {
           </label>
         </section>
       </form>
+      <img src="http://localhost:5005/images/logo.png" alt="logo" className="logo-image" />
     </div>
   );
 }
