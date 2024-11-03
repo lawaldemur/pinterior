@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import searchSVG from "../assets/search.svg";
+import leftBackSVG from "../assets/leftBack.svg";
 import axios from "axios";
+
 
 function Process() {
   const navigate = useNavigate();
@@ -36,6 +39,7 @@ function Process() {
     e.preventDefault();
     navigate("/results");
   }
+
 
   function handleBack() {
     navigate(-1); // Go back to the previous page
@@ -135,8 +139,6 @@ function Process() {
           />
         ))}
       </div>
-
-
       </div>
     </div>
   );
