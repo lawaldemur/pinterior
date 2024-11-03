@@ -1,43 +1,56 @@
+import numpy as np
 import cv2
 import os
-import numpy as np
 
-CROPPED_FOLDER = "./cropped"
-os.makedirs(CROPPED_FOLDER, exist_ok=True)
+# Ensure the output directory exists
+output_dir = "./cropped"
+os.makedirs(output_dir, exist_ok=True)
 
-# Load the two images
-image2 = cv2.imread("./images/r_edited_r_edited_r_edited_r_edited_r_edited_r_edited_r_edited_r_edited_image_3110726969_255991874_2997835253_3058331123_760496478_130496237_1288699302_3896622530.png")
-image1 = cv2.imread("./images/r_edited_r_edited_r_edited_r_edited_r_edited_r_edited_image_3110726969_255991874_2997835253_3058331123_760496478_130496237.png")
-
-# Convert images to grayscale
+# Load images and convert to grayscale
+image1 = cv2.imread('./images/r_edited_r_edited_r_edited_r_edited_image_2469970626_2492014085_1934990478_1952977494.png')
+image2 = cv2.resize(cv2.imread('./images/image.jpg'), (image1.shape[1], image1.shape[0]))  # Ensure same size
 gray1 = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
 gray2 = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
 
-# Compute the absolute difference between the images
+# Calculate the absolute difference
 diff = cv2.absdiff(gray1, gray2)
 
-# Apply a binary threshold to the difference image
+# Threshold the difference to get a binary image
 _, thresh = cv2.threshold(diff, 30, 255, cv2.THRESH_BINARY)
 
-# Find contours of the thresholded image
+# Find contours of the changes
 contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-# Calculate the bounding box for the contours and expand by 100 pixels
-if contours:
-    x, y, w, h = cv2.boundingRect(np.vstack(contours))  # Bounding box around all contours
-    x = max(0, x - 100)
-    y = max(0, y - 100)
-    w = min(image1.shape[1] - x, w + 200)  # Ensure within image bounds
-    h = min(image1.shape[0] - y, h + 200)
+# Identify the largest contour by area
+largest_contour = max(contours, key=cv2.contourArea)
 
-    # Crop the image using the expanded bounding box
-    cropped_image = image1[y:y+h, x:x+w]
+# Get the center and radius of the minimum enclosing circle of the largest contour
+(x, y), radius = cv2.minEnclosingCircle(largest_contour)
+center = (int(x), int(y))
+enlarged_radius = int(radius * 1.5)  # Increase radius for more white background around the circle
 
-    # Save or display the final cropped image
-    cv2.imwrite(f"{CROPPED_FOLDER}/cropped_changed_area_with_margin.jpg", cropped_image)
-    # To display the image, uncomment the line below
-    # cv2.imshow("Cropped Changed Area with Margin", cropped_image)
-    # cv2.waitKey(0)
+# Define padding to add some extra space around the circle
+padding = 20
 
-# Clean up and close windows if displaying
-cv2.destroyAllWindows()
+# Calculate the bounding box for cropping, ensuring it stays within image bounds
+x_min = max(0, center[0] - enlarged_radius - padding)
+x_max = min(image1.shape[1], center[0] + enlarged_radius + padding)
+y_min = max(0, center[1] - enlarged_radius - padding)
+y_max = min(image1.shape[0], center[1] + enlarged_radius + padding)
+
+# Create a white background for the cropped area
+cropped_image = np.ones((y_max - y_min, x_max - x_min, 3), dtype=np.uint8) * 255
+
+# Draw the circle on the white background
+cv2.circle(cropped_image, (center[0] - x_min, center[1] - y_min), enlarged_radius, (0, 0, 0), -1)
+
+# Mask for keeping the area inside the circle
+mask = np.zeros_like(image1, dtype=np.uint8)
+cv2.circle(mask, center, enlarged_radius, (255, 255, 255), -1)
+
+# Place the content inside the circle from the original image onto the white background
+cropped_image = np.where(mask[y_min:y_max, x_min:x_max] == 255, image1[y_min:y_max, x_min:x_max], cropped_image)
+
+# Save the cropped image
+output_path = os.path.join(output_dir, "cropped_image.jpg")
+cv2.imwrite(output_path, cropped_image)
