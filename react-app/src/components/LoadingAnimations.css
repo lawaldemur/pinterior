@@ -1,0 +1,45 @@
+@keyframes animation_Ellipse_1998_5_flow_1 {
+    from {
+      opacity: 0;
+      fill: url(#paint3_radial_56_5011);
+    }
+    to {
+      opacity: 1;
+      fill: url(#paint3_radial_56_5029);
+    }
+  }
+  
+  @keyframes animation_Ellipse_1998_5_flow_2 {
+    from {
+      opacity: 1;
+      fill: url(#paint3_radial_56_5029);
+    }
+    to {
+      opacity: 0;
+      fill: url(#paint4_radial_56_5011);
+    }
+  }
+  
+  /* Repeat for each animation */
+  
+  #Ellipse_1998_5 {
+    animation: animation_Ellipse_1998_5_flow_1 0.8s cubic-bezier(0.7, -0.4, 0.4, 1.4) 0s forwards,
+      animation_Ellipse_1998_5_flow_2 0.8s cubic-bezier(0.72, -0.005, 0.36, 1.015) 0.8s forwards;
+  }
+  
+  #Ellipse_1996_7 {
+    animation: animation_Ellipse_1996_7_flow_1 0.8s cubic-bezier(0.7, -0.4, 0.4, 1.4) 0s forwards,
+      animation_Ellipse_1996_7_flow_2 0.8s cubic-bezier(0.72, -0.005, 0.36, 1.015) 0.8s forwards;
+  }
+  
+  /* Add similar CSS for all animated elements */
+  
+  .svg-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+  

@@ -42,10 +42,25 @@ function Upload() {
   };
 
   return (
-    <div>
-      <form onSubmit={handleImageUpload}>
+    <div className="upload-container">
+      <h1 className="title">Welcome to Pinterior</h1>
+      <p className="subtitle">Upload your room image</p>
+      <form onSubmit={handleImageUpload} className="upload-form">
         <section className="previewSection">
-          <input type="file" onChange={handleImageChange} />
+          <label>
+          <input
+            type="file"
+            onChange={handleImageChange}
+            className="file-input"
+          />
+          <div className="upload-box">
+            {preview ? (
+              <img src={preview} alt="Preview" className="preview-image" />
+            ) : (
+              <span className="plus-icon">+</span>
+            )}
+          </div>
+          </label>
         </section>
       </form>
     </div>
